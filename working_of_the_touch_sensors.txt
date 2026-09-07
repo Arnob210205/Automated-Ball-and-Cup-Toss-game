@@ -1,0 +1,86 @@
+const int touchPin1 = 2;
+const int touchPin2 = 3;
+const int touchPin3 = 8;
+const int touchPin4 = 7;
+const int buzzerPin = 4;
+const int ledPin = 6;
+
+int count1 = 0;
+int count2 = 0;
+int count3 = 0;
+int count4 = 0;
+int totalCount = 0;
+
+bool prevTouch1 = false;
+bool prevTouch2 = false;
+bool prevTouch3 = false;
+bool prevTouch4 = false;
+
+void setup() {
+  pinMode(touchPin1, INPUT);
+  pinMode(touchPin2, INPUT);
+  pinMode(touchPin3, INPUT);
+  pinMode(touchPin4, INPUT);
+  pinMode(buzzerPin, OUTPUT);
+  pinMode(ledPin, OUTPUT);
+
+  Serial.begin(9600);
+}
+
+void loop() {
+  int touchValue1 = digitalRead(touchPin1);
+  int touchValue2 = digitalRead(touchPin2);
+  int touchValue3 = digitalRead(touchPin3);
+  int touchValue4 = digitalRead(touchPin4);
+
+  bool anyTouch = false;
+
+  // Sensor 1
+  if (touchValue1 == HIGH && !prevTouch1) {
+    count1++;
+    totalCount++;
+    anyTouch = true;
+  }
+  prevTouch1 = (touchValue1 == HIGH);
+
+  // Sensor 2
+  if (touchValue2 == HIGH && !prevTouch2) {
+    count2++;
+    totalCount++;
+    anyTouch = true;
+  }
+  prevTouch2 = (touchValue2 == HIGH);
+
+  // Sensor 3
+  if (touchValue3 == HIGH && !prevTouch3) {
+    count3++;
+    totalCount++;
+    anyTouch = true;
+  }
+  prevTouch3 = (touchValue3 == HIGH);
+
+  // Sensor 4
+  if (touchValue4 == HIGH && !prevTouch4) {
+    count4++;
+    totalCount++;
+    anyTouch = true;
+  }
+  prevTouch4 = (touchValue4 == HIGH);
+
+  // Output control
+  digitalWrite(buzzerPin, anyTouch ? HIGH : LOW);
+  digitalWrite(ledPin, anyTouch ? HIGH : LOW);
+
+  // Show counts only when any sensor is touched
+  if (anyTouch) {
+    Serial.println("Touch Detected!");
+    Serial.print("Sensor 1 Count: "); Serial.println(count1);
+    Serial.print("Sensor 2 Count: "); Serial.println(count2);
+    Serial.print("Sensor 3 Count: "); Serial.println(count3);
+    Serial.print("Sensor 4 Count: "); Serial.println(count4);
+    Serial.print("Total Touches  : "); Serial.println(totalCount);
+    Serial.println("------------------------");
+  }
+
+  delay(500); // debounce delay
+}

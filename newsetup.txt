@@ -1,0 +1,54 @@
+#include <Stepper.h>
+
+// 28BYJ-48 has ~2048 steps per revolution with gear reduction
+const int stepsPerRevolution = 2048;
+
+// Motor pin setup for ULN2003
+const int motorPin1 = 8;
+const int motorPin2 = 9;
+const int motorPin3 = 10;
+const int motorPin4 = 11;
+
+// Input pins
+const int potPin = A0;
+const int buttonPin = 2;
+
+// Stepper motor object
+Stepper stepper(stepsPerRevolution, motorPin1, motorPin3, motorPin2, motorPin4);
+
+bool directionCW = true;       // Current direction
+bool lastButtonState = HIGH;   // For detecting button press
+unsigned long lastDebounceTime = 0;
+const unsigned long debounceDelay = 50;
+
+void setup() {
+  pinMode(buttonPin, INPUT_PULLUP);
+  Serial.begin(9600);
+  Serial.println("Stepper motor ready");
+}
+
+void loop() {
+  // --- Button debounce and direction toggle ---
+  bool currentButtonState = digitalRead(buttonPin);
+  if (currentButtonState != lastButtonState) {
+    lastDebounceTime = millis();
+  }
+
+  if ((millis() - lastDebounceTime) > debounceDelay) {
+    if (lastButtonState == HIGH && currentButtonState == LOW) {
+      directionCW = !directionCW;
+      Serial.print("Direction: ");
+      Serial.println(directionCW ? "CW" : "CCW");
+    }
+  }
+  lastButtonState = currentButtonState;
+
+  // --- Potentiometer speed control ---
+  int potValue = analogRead(potPin);
+  int motorSpeed = map(potValue, 0, 1023, 0, 30); // Up to 30 RPM
+
+  if (motorSpeed > 0) {
+    stepper.setSpeed(motorSpeed);
+    stepper.step(directionCW ? 1 : -1);
+  }
+}
